@@ -28,20 +28,19 @@ const userDetails = require("../models/userSchema");
 
 userRouter.post("/", upload.single("profile_pic"), async (req, res) => {
   const hashPass = await bcrypt.hash(req.body.uPass, 10);
-  const imgRes = await uploadS3(req.file)
-    .then(() => {
-      console.log(imgRes);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  console.log(imgRes);
+  // const imgRes = await uploadS3(req.file)
+  //   .then(() => {
+  //     console.log(imgRes);
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
+  //   });
+  // console.log(imgRes);
   const makeUser = new userDetails({
     name: req.body.uName,
     emailId: req.body.uEmail,
     phoneNo: req.body.uNum,
     password: hashPass,
-    userImage: req.file.filename,
   });
 
   try {

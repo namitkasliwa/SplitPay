@@ -13,7 +13,7 @@ script:
 deploy:
   provider: heroku
   api_key: e6e21d10-511f-49ca-ad48-fe88ba2df243
-  app: splitpayatul
+  app: splitpaymanav
 
 on:
   all_branches: true

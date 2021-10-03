@@ -23,10 +23,7 @@ const splitpayment = require("./server/models/splitSchema");
 // const { getImageS3 } = require("./s3");
 
 const passport = "passport";
-// const initializePassport = require('./passportConfig')
-// initializePassport(passport, checkAll.emailId)
 
-// const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose
   .connect(uri, {
     useCreateIndex: true,

@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/atulragarwal/SplitPay-Intership-Saksoft.git"
+    "url": "git+https://github.com/manavnanwani/SplitPay.git"
   },
-  "author": "Atul",
+  "author": "Manav",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/atulragarwal/SplitPay-Intership-Saksoft/issues"
+    "url": "https://github.com/manavnanwani/SplitPay/issues"
   },
-  "homepage": "https://github.com/atulragarwal/SplitPay-Intership-Saksoft#readme",
+  "homepage": "https://github.com/manavnanwani/SplitPay#readme",
   "dependencies": {
     "aws-sdk": "^2.956.0",
     "bcryptjs": "^2.4.3",
