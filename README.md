@@ -1,1 +1,1 @@
-# SplitPay-Intership-Saksoft
+# SplitPay
