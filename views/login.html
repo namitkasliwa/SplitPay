@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SplitPay</title>
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link rel="Stylesheet" href="css/login.css">
+        <link rel="icon" type="image" href="images/icon.jpg">
+        <link rel="stylesheet" href="css/payments.css">
+        <link rel="stylesheet" href="css/pay.css">
+        <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://kit.fontawesome.com/bc6f27e589.js" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .m-container{
+                background-image: url(images/loginbg.jpeg);
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+            .b-body{
+                margin-top: 200px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="m-container">
+            <div class="b-body">
+                <h3>Namaste!</h3>
+                <h4>Log in to jump into SplitPay
+                </h4>
+                <form id="form" method="POST" action="/createToken">
+                    <label for="u-email">Your Email</label><br>
+                    <input name="uEmail" id="u-email" required placeholder="xyz@xyz.com" type="email"><br>
+                    <label for="u-pass">Your Password</label><br>
+                    <input name=uPass id="u-pass" placeholder="Password" required type="password"><br>
+                    <!-- <a href="#">Forgot Password</a> -->
+                    <input type="submit" value="Continue">
+                </form>
+                <a href="/signup">Click Here to Sign Up</a>
+            </div>
+        </div>
+        <!-- <script>
+            document.getElementById('form').addEventListener('submit', (e) =>{
+                e.preventDefault();
+            })
+            function validateUser()
+            {
+                let userId = document.getElementById("u-email").value;
+                let userPassword = document.getElementById("u-pass").value;
+                fetch('http://127.0.0.1:8000/auth/djoser/token/login/',{
+                // mode:'no-cors',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'PostmanRuntime/7.28.0'
+                },
+                body: JSON.stringify({
+                    "email": userId,
+                    "password": userPassword,
+                })
+            }).then(res =>{
+                return res.json();
+            })
+            .then(data => {
+
+                    sessionStorage.setItem('userToken', data.auth_token);
+                    console.log('Success');
+                    window.location.href = 'http://127.0.0.1:5500/Frontend/HTML/home.html';
+                console.log(data);})
+            .catch(error => console.log(error))
+            }
+        </script> -->
+    </body>
+</html>
