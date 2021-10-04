@@ -29,35 +29,40 @@
     </style>
   </head>
   <body>
+    <div class="sidebar">
+      <a href="/home">
+        <div class="paymentOption">
+          <p>Home</p>
+        </div>
+      </a>
+      <a href="/getSplits">
+        <div class="paymentOption">
+          <p>Splits</p>
+        </div>
+      </a>
+      <a href="/userSettings">
+        <div class="paymentOption">
+          <p>Settings</p>
+        </div>
+      </a>
+    </div>
     <div class="m-container">
       <div class="b-head">
-        <h3 style="display: inline-block; font-size: 40px; margin-left: 15px">
-          User Settings
-        </h3>
+        <center>
+          <h3 style="display: inline-block; font-size: 36px; margin-left: 15px">
+            USER SETTINGS
+          </h3>
+        </center>
       </div>
       <div class="userDetails">
         <img id="userDisp" class="userImage" />
         <div class="textDetails">
-          <h4 id="renderName" style="font-size: 30px"></h4>
-          <p id="renderBal"></p>
+          <h4 id="renderName" style="font-size: 35px; margin: 20px 0"></h4>
+          <p id="renderBal" style="margin: 20px 0"></p>
         </div>
-      </div>
-      <div class="settingOption" style="margin-top: 25px">
-        <div style="margin-left: 15px">
-          <h4>View QR Code</h4>
-          <p></p>
-        </div>
-        <a
-          href="qrView.html"
-          style="color: black; margin-left: auto; margin-top: 0"
-          ><i
-            style="margin-right: 15px; margin-left: auto"
-            class="fas fa-arrow-right"
-          ></i
-        ></a>
       </div>
 
-      <div class="settingOption" style="margin-bottom: 80px">
+      <div class="settingOption" style="margin-bottom: 80px; margin-top: 80px">
         <div style="margin-left: 15px">
           <h4>Logout</h4>
           <p>Sign Out of your account</p>
@@ -68,21 +73,6 @@
             class="fas fa-arrow-right"
           ></i
         ></a>
-      </div>
-
-      <div class="bottomNav" style="background-color: rgb(242, 242, 242)">
-        <div class="paymentOption">
-          <i class="fas fa-money-bill-wave-alt"></i>
-          <p><a href="/home">Payments</a></p>
-        </div>
-        <div class="paymentOption">
-          <i class="fas fa-chart-pie"></i>
-          <p><a href="/getSplits">Splits</a></p>
-        </div>
-        <div class="paymentOption">
-          <i class="fas fa-cog"></i>
-          <p><a href="/userSettings">Settings</a></p>
-        </div>
       </div>
     </div>
     <script>
@@ -110,25 +100,5 @@
         })
         .catch((error) => console.log("Error"));
     </script>
-    <!-- <script>
-            function userLogout(){
-                let logoutId = sessionStorage.getItem('userToken');
-                fetch('http://127.0.0.1:8000/auth/djoser/token/logout/',{
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'PostmanRuntime/7.28.0',
-                    'Authorization': 'Token '+logoutId
-                },
-            }).then(res =>{
-                window.location.href = 'http://127.0.0.1:5500/Frontend/HTML/login.html';
-                return res.json()
-            })
-            .then(function(){
-                window.location.href = 'http://127.0.0.1:5500/Frontend/HTML/login.html';
-            })
-            .catch(error => console.log('Error'))
-            }
-        </script> -->
   </body>
 </html>
