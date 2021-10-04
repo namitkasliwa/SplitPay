@@ -4,7 +4,7 @@
     <title>SplitPay</title>
     <link rel="icon" type="image" href="images/icon.jpg" />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
-    <link rel="Stylesheet" href="css/login.css" />
+    <link rel="Stylesheet" href="css/split.css" />
     <link rel="stylesheet" href="css/payments.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap"
@@ -28,9 +28,7 @@
         height: 80px;
       }
       .u-card > p {
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 20px;
+        margin: auto;
       }
       #displayTable {
         width: 100%;
@@ -56,17 +54,79 @@
         width: 50px;
         height: 50px;
       }
+      .navbar {
+        color: white;
+        min-height: 50px;
+        padding: 4px 10px;
+        background-color: #5c07db;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      .navbar > div > h3 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        font-size: 30px;
+        padding: 10px 20px;
+      }
+      .b-head {
+        display: flex;
+        align-items: center;
+      }
+      #displayTable {
+        width: 80%;
+      }
+      #displayTable > tr {
+        width: 100%;
+      }
+      #displayTable > tbody > tr > td {
+        padding: 1px 5px;
+      }
+      #displayTable1 > tbody > tr > td {
+        padding: 5px;
+      }
+      #displayTable > tbody > tr,
+      #displayTable1 > tbody > tr,
+      #displayTable > thead > tr,
+      #displayTable1 > thead > tr {
+        outline: 1px solid #5c07db;
+        border-radius: 5px;
+      }
+
+      .rowGap {
+        height: 3px;
+        outline: none !important;
+      }
+      .rowGap > td {
+        padding: 0 !important;
+      }
     </style>
   </head>
   <body>
+    <div class="sidebar">
+      <a href="/home">
+        <div class="paymentOption">
+          <p>Home</p>
+        </div>
+      </a>
+      <a href="/getSplits">
+        <div class="paymentOption">
+          <p>Splits</p>
+        </div>
+      </a>
+      <a href="/userSettings">
+        <div class="paymentOption">
+          <p>Settings</p>
+        </div>
+      </a>
+    </div>
     <div class="m-container">
-      <div class="b-head">
-        <h3>Splits Debts</h3>
-        <a
-          style="float: right"
-          href="https://docs.google.com/document/d/1XRGH7iECFYXqqP-rYERKpPSdEJZUMrsEKaR2Om5JhM0/edit?usp=sharing"
-          ><i class="far fa-question-circle"></i
-        ></a>
+      <div class="navbar">
+        <div class="b-head">
+          <a href="home"><i class="fas fa-arrow-left"></i></a>
+          <h3>Splits Debts</h3>
+        </div>
       </div>
       <div class="b-body">
         <div class="topDebt">
@@ -82,26 +142,27 @@
         </div>
         <h3 style="float: left">Active Splits</h3>
         <div style="width: 95%; margin-left: auto; margin-right: auto">
-          <table id="displayTable"></table>
+          <table id="displayTable">
+            <thead>
+              <td><strong>YOU GET FROM</strong></td>
+              <td><strong>AMOUNT</strong></td>
+              <td><strong>ACTIONS</strong></td>
+              <tr class="rowGap"></tr>
+            </thead>
+          </table>
         </div>
         <h3>All Splits</h3>
         <span>
-          <table id="displayTable1"></table>
+          <table id="displayTable1">
+            <thead>
+              <td><strong>CREATED BY</strong></td>
+              <td><strong>FOR</strong></td>
+              <td><strong>AMOUNT</strong></td>
+              <td><strong>NOTE</strong></td>
+              <tr class="rowGap"></tr>
+            </thead>
+          </table>
         </span>
-      </div>
-      <div class="bottomNav" style="background-color: rgb(242, 242, 242)">
-        <div class="paymentOption">
-          <i class="fas fa-money-bill-wave-alt"></i>
-          <p><a href="/home">Payments</a></p>
-        </div>
-        <div class="paymentOption">
-          <i class="fas fa-chart-pie"></i>
-          <p><a href="/getSplits">Splits</a></p>
-        </div>
-        <div class="paymentOption">
-          <i class="fas fa-cog"></i>
-          <p><a href="/userSettings">Settings</a></p>
-        </div>
       </div>
     </div>
     <script>
@@ -139,6 +200,42 @@
               "</tr>";
           });
           document.getElementById("amtTotal").innerHTML = collectAmt;
+        })
+        .catch((error) => console.log(error));
+      fetch("/allSplits", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "PostmanRuntime/7.28.0",
+          Authorization: "Bearer " + tokenId,
+        },
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          console.log(data);
+          var allDisplay = document.getElementById("displayTable1");
+          data.forEach((element) => {
+            allDisplay.innerHTML +=
+              "<tr>" +
+              "<td>" +
+              element.giverName +
+              "</td>" +
+              "<td>" +
+              element.getterName +
+              "</td>" +
+              "<td>" +
+              element.giveAmt +
+              "</td>" +
+              "<td>" +
+              element.giveReason +
+              "</td>" +
+              "</tr>" +
+              '<tr class="rowGap">' +
+              "<td></td><td></td>" +
+              "</tr>";
+          });
         })
         .catch((error) => console.log(error));
     </script>
