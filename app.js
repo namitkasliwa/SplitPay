@@ -1,28 +1,28 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const ObjectId = require("mongodb").ObjectID;
 const mongoose = require("mongoose");
-const uri =
-  "mongodb+srv://Manav:Manav123@cluster0.k0njo.mongodb.net/SplitPay?retryWrites=true&w=majority";
-const app = express();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const multer = require("multer");
+
+const details = require("./server/models/paymentSchema");
+const splitpayment = require("./server/models/splitSchema");
+const userCreate = require("./server/routes/user");
+
+const uri =
+  "mongodb+srv://Manav:Manav123@cluster0.k0njo.mongodb.net/SplitPay?retryWrites=true&w=majority";
+
+const app = express();
 app.use(bodyParser.urlencoded({ extended: true, limit: "30mb" }));
 app.use(bodyParser.json({ extended: true }));
-const path = require("path");
 app.use(cors());
+
 require("dotenv").config();
-const session = require("express-session");
+app.use("/createUser", userCreate);
+
 let accessToken;
 let user;
 const PORT = process.env.PORT || 9000;
-const details = require("./server/models/paymentSchema");
-const splitpayment = require("./server/models/splitSchema");
-// const { getImageS3 } = require("./s3");
-
-const passport = "passport";
 
 mongoose
   .connect(uri, {
@@ -37,128 +37,89 @@ mongoose
   .catch((err) => {
     res.json(err);
   });
+
+app.listen(PORT, () => {
+  console.log("Server Started");
+});
+
 const conn = mongoose.connection;
 
 conn.on("open", () => {
   console.log("Success");
 });
 
-const fileStorage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    callback(null, "./public/uploads");
-  },
-
-  filename: function (req, file, callback) {
-    callback(null, file.originalname);
-  },
-});
-
-const upload = multer({
-  storage: fileStorage,
-  limits: {
-    fileSize: 10000000,
-  },
-});
 app.use(express.json());
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use("/css", express.static(__dirname + "public/css"));
 app.use("/css", express.static(__dirname + "public/images"));
 
+// //////////////////
+// ROUTES
+// //////////////////
+
+app.get("/", (req, res) => {
+  res.redirect("/login");
+});
+
 app.get("/updatePay", (req, res) => {
   res.sendFile(__dirname + "/views/updatePay.html");
+});
+
+app.get("/login", (req, res) => {
+  res.sendFile(__dirname + "/views/login.html");
 });
 
 app.get("/signup", (req, res) => {
   res.sendFile(__dirname + "/views/signup.html");
 });
-app.post("/updateDet", (req, res) => {
-  // console.log(req.body)
-  const makeUpdate = conn
-    .collection("details")
-    .updateOne(
-      { payer: req.body.payerNum },
-      {
-        $set: { payee: req.body.updateVal },
-      }
-    )
-    .then((results) => {
-      res.redirect("/home");
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-  // console.log(makeUpdate)
+
+app.get("/makeUserPayment", (req, res) => {
+  res.sendFile(__dirname + "/views/pay.html");
 });
 
 app.get("/deletePay", (req, res) => {
   res.sendFile(__dirname + "/views/deletePay.html");
 });
 
-app.post("/deleteDet", (req, res) => {
-  // console.log(req.body)
-  const makeUpdate = conn
-    .collection("details")
-    .deleteOne({ payer: req.body.payerDel })
-    .then((result) => {
-      // console.log(result)
-      res.redirect("/home");
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+app.get("/splits", async (req, res) => {
+  res.sendFile(__dirname + "/views/newSplit.html");
 });
 
-// app.get('/checkUser', (req,res) =>{
-//     const checkAll = conn.collection('userdetails').find().toArray().then(results => {console.log(results)})
-// })
-
-// const cursor = conn.collection('details').find({
-//     $and : [
-//         {payer : {req.body.payerNum}},{payee : {req.body.payeeNum}}
-//     ]
-// })
-
-app.get("/", (req, res) => {
-  res.redirect("/login");
+app.get("/getSplits", async (req, res) => {
+  res.sendFile(__dirname + "/views/splitCollect.html");
 });
 
-// app.get("/", (req,res)=> {
-//     const cursor = conn.collection('details').find().toArray()
-//     .then(results => {
-//         console.log("Fetch Success")
-//         res.render('pay.ejs', {details: results})
-//     })
-//     .catch(error => console.log(error))
-//     console.log(cursor)
-// })
-
-app.get("/makeUserPayment", (req, res) => {
-  res.sendFile(__dirname + "/views/pay.html");
-});
-// app.get('/home', (req,res) => {
-//     res.sendFile(__dirname + '/views/home.html')
-// })
-
-app.get("/home", (req, res) => {
-  const cursor1 = conn
-    .collection("details")
-    .find()
-    .toArray()
-    .then((results) => {
-      // console.log(results)
-      res.sendFile(__dirname + "/views/home.html");
-    })
-    .catch((error) => console.log(error));
-  console.log(cursor1);
-});
-app.post("/pays", (req, res) => {
-  console.log(req.body);
+app.get("/splitDebt", async (req, res) => {
+  res.sendFile(__dirname + "/views/splitDebt.html");
 });
 
-app.get("/login", (req, res) => {
-  res.sendFile(__dirname + "/views/login.html");
+app.get("/settleDebt", async (req, res) => {
+  res.sendFile(__dirname + "/views/settleUp.html");
 });
+
+app.get("/userSettings", async (req, res) => {
+  res.sendFile(__dirname + "/views/userSettings.html");
+});
+
+// //////////////////
+// AUTHENTICATION
+// //////////////////
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) return res.json(err);
+    req.user = user;
+    next();
+  });
+}
+
+// //////////////////
+// CONTROLLERS
+// //////////////////
 
 app.post("/createToken", async (req, res) => {
   try {
@@ -182,26 +143,57 @@ app.post("/createToken", async (req, res) => {
   }
 });
 
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader.split(" ")[1];
-  // console.log('hign')
-  // console.log(token)
+app.post("/updateDet", (req, res) => {
+  // console.log(req.body)
+  const makeUpdate = conn
+    .collection("details")
+    .updateOne(
+      { payer: req.body.payerNum },
+      {
+        $set: { payee: req.body.updateVal },
+      }
+    )
+    .then((results) => {
+      res.redirect("/home");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  // console.log(makeUpdate)
+});
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-    if (err) return res.json(err);
-    req.user = user;
-    next();
-  });
-}
+app.post("/deleteDet", (req, res) => {
+  // console.log(req.body)
+  const makeUpdate = conn
+    .collection("details")
+    .deleteOne({ payer: req.body.payerDel })
+    .then((result) => {
+      // console.log(result)
+      res.redirect("/home");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
 
-// app.get("/fetchImage", async (req, res) => {
-//   const getImageStream = await getImageS3(user.userImage);
-//   getImageStream.pipe(res);
+app.get("/home", (req, res) => {
+  const cursor1 = conn
+    .collection("details")
+    .find()
+    .toArray()
+    .then((results) => {
+      // console.log(results)
+      res.sendFile(__dirname + "/views/home.html");
+    })
+    .catch((error) => console.log(error));
+  // console.log(cursor1);
+});
+
+// app.post("/pays", (req, res) => {
+// console.log(req.body);
 // });
 
 app.get("/fetchUserDetail", authenticateToken, async (req, res) => {
-  // console.log(getImageStream.pipe(res))
   res.json(user);
 });
 
@@ -249,7 +241,6 @@ app.post("/makeSplit", authenticateToken, async (req, res) => {
   const amtDiv = req.body.amount / userLength;
   let splitUsers = req.body.payee;
   const splitReason = req.body.reason;
-  // splitUsers.push(user.phoneNo)
   let i = 0;
   for (i = 0; i < userLength - 1; i++) {
     const userSplit = await conn
@@ -286,15 +277,6 @@ app.post("/makeSplit", authenticateToken, async (req, res) => {
   }
   res.json("User Added Successfully");
   // console.log(splitUsers)
-});
-
-app.get("/splits", async (req, res) => {
-  // const userCollects = await conn.collection('details').find({payer})
-  res.sendFile(__dirname + "/views/newSplit.html");
-});
-
-app.get("/getSplits", async (req, res) => {
-  res.sendFile(__dirname + "/views/splitCollect.html");
 });
 
 app.get("/showCollect", authenticateToken, async (req, res) => {
@@ -383,18 +365,6 @@ app.get("/allSplits", authenticateToken, async (req, res) => {
   });
 });
 
-app.get("/splitDebt", async (req, res) => {
-  res.sendFile(__dirname + "/views/splitDebt.html");
-});
-
-app.get("/settleDebt", async (req, res) => {
-  res.sendFile(__dirname + "/views/settleUp.html");
-});
-
-app.get("/userSettings", async (req, res) => {
-  res.sendFile(__dirname + "/views/userSettings.html");
-});
-
 app.get("/settleUser/:id", authenticateToken, async (req, res) => {
   // console.log(req.params['id'])
   const splitBetween = await conn
@@ -452,16 +422,4 @@ app.post("/payment", authenticateToken, async (req, res) => {
   } catch (err) {
     res.send(err);
   }
-});
-
-const userCreate = require("./server/routes/user");
-const initialize = require("./passportConfig");
-// const { access } = require('fs')
-app.use("/createUser", userCreate);
-
-// const tokenCreate = require("./server/routes/user")
-// app.use('/createToken', tokenCreate)
-
-app.listen(PORT, () => {
-  console.log("Server Started");
 });
