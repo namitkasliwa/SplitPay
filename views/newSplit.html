@@ -145,9 +145,10 @@
         }
         splitUsers.push(userNum);
         document.getElementById("numDisplay").innerHTML = "";
-        // userNum.value = "";
+        userNum.value = 0;
         splitUsers.forEach((element) => {
-          document.getElementById("numDisplay").innerHTML += element + "<br>";
+          document.getElementById("numDisplay").innerHTML +=
+            splitUsers.indexOf(element) + 1 + ". " + element + "<br>";
         });
       }
 

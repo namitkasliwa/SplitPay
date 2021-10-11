@@ -32,10 +32,12 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    res.json("Connection Completed");
+    console.log("Connection Completed");
+    // res.json("Connection Completed");
   })
   .catch((err) => {
-    res.json(err);
+    console.log(err);
+    // res.json(err);
   });
 
 app.listen(PORT, () => {
