@@ -4,6 +4,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 
 const details = require("./server/models/paymentSchema");
 const splitpayment = require("./server/models/splitSchema");
@@ -62,6 +63,10 @@ app.use("/css", express.static(__dirname + "public/images"));
 
 app.get("/", (req, res) => {
   res.redirect("/login");
+});
+
+app.get("/chat", (req, res) => {
+  res.sendFile(__dirname + "/views/chat.html");
 });
 
 app.get("/updatePay", (req, res) => {
@@ -191,6 +196,12 @@ app.get("/home", (req, res) => {
   // console.log(cursor1);
 });
 
+app.get("/getcontacts", authenticateToken, async (req, res) => {
+  let userTrans = await conn.collection("userdetails").find().toArray();
+  userTrans = userTrans.filter((u) => String(u._id) !== String(user._id));
+  res.json(userTrans);
+});
+
 // app.post("/pays", (req, res) => {
 // console.log(req.body);
 // });
@@ -245,6 +256,10 @@ app.post("/makeSplit", authenticateToken, async (req, res) => {
   const splitReason = req.body.reason;
   let i = 0;
   for (i = 0; i < userLength - 1; i++) {
+    const userFromDB = await conn
+      .collection("userdetails")
+      .find({ phoneNo: Number(splitUsers[i]) })
+      .toArray();
     const userSplit = await conn
       .collection("splitpayments")
       .find({
@@ -261,7 +276,27 @@ app.post("/makeSplit", authenticateToken, async (req, res) => {
         splitPayee: splitUsers[i],
         splitNote: splitReason,
       });
-      let splitSave = await newSplit.save();
+      await newSplit.save();
+      try {
+        (transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: "splitpayiwp@gmail.com",
+            pass: "arunkumarg",
+          },
+        })),
+          (mailOption = {
+            from: "splitpayiwp@gmail.com",
+            to: userFromDB[0].emailId,
+            subject: "New Split Created",
+            html: `A New Split Payment has been created!!<br /><br />You need to pay ${user.name}(${user.phoneNo}) a total of ${amtDiv}<br /><br /><b>Note:</b>&nbsp;${splitReason}`,
+          }),
+          transporter.sendMail(mailOption, (err, data) => {
+            console.log("Email Sent!");
+          });
+      } catch (error) {
+        console.log(error);
+      }
     } else {
       let paymentBalance = Number(userSplit[0].splitAmount) + Number(amtDiv);
       const splitUpdate = await conn
@@ -417,8 +452,32 @@ app.post("/payment", authenticateToken, async (req, res) => {
     amount: req.body.amount,
     note: req.body.note,
   });
+  const userFromDB = await conn
+    .collection("userdetails")
+    .find({ phoneNo: Number(req.body.payee) })
+    .toArray();
   try {
     const makeNew = await makePayment.save();
+    try {
+      (transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "splitpayiwp@gmail.com",
+          pass: "arunkumarg",
+        },
+      })),
+        (mailOption = {
+          from: "splitpayiwp@gmail.com",
+          to: userFromDB[0].emailId,
+          subject: "New Split Created",
+          html: `${user.name} just payed you <b>Rs.${req.body.amount}<b/><br /><br /><b>Note:</b>&nbsp;${req.body.note}`,
+        }),
+        transporter.sendMail(mailOption, (err, data) => {
+          console.log("Email Sent!");
+        });
+    } catch (error) {
+      console.log(error);
+    }
     res.redirect("/");
     // res.json(makeNew)
   } catch (err) {

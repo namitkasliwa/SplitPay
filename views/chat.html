@@ -111,6 +111,15 @@
       .rowGap > td {
         padding: 0 !important;
       }
+      .chatButton {
+        border: none;
+        background-color: #5c07db;
+        color: white;
+        border-radius: 10px;
+        padding: 10px;
+        cursor: pointer;
+        width: 100px;
+      }
     </style>
   </head>
   <body>
@@ -155,23 +164,18 @@
       <div class="m-container">
         <div class="b-head">
           <h3 style="display: inline-block; font-size: 30px; margin-left: 40px">
-            Payments Home
+            Chat
           </h3>
         </div>
         <div class="b-body">
-          <div>
-            <a href="/splits" class="payButton addButton">New Split</a
-            ><a href="/makeuserPayment" class="payButton newButton">Payment</a>
-          </div>
-          <br /><br />
-          <h3 style="color: #5c07db">Recent Transactions</h3>
+          <br />
+          <h3 style="color: #5c07db">All Contacts</h3>
           <span id="historyRender">
             <div class="recTrans">
               <table id="displayTable">
                 <thead>
-                  <td><strong> Sent By </strong></td>
-                  <td><strong> Received By </strong></td>
-                  <td><strong> Amount </strong></td>
+                  <td><strong> Name </strong></td>
+                  <td><strong> Actions </strong></td>
                 </thead>
                 <tr class="rowGap">
                   <td></td>
@@ -239,7 +243,7 @@
         .catch((transError) => console.log("Error" + transError));
 
       //fetching user Transactions
-      fetch("/fetchTransactions", {
+      fetch("/getcontacts", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -254,8 +258,7 @@
           console.log(transDetails);
           let i = 0;
           if (transDetails.length == 0) {
-            document.getElementById("historyRender").innerHTML =
-              "No Recent Transactions";
+            document.getElementById("historyRender").innerHTML = "No Contacts";
           } else {
             var nameDisplay = document.getElementById("displayTable");
             transDetails.forEach((element) => {
@@ -263,13 +266,10 @@
               nameDisplay.innerHTML +=
                 "<tr>" +
                 '<td width="50%">' +
-                element.giverName +
+                element.name +
                 "</td>" +
                 "<td>" +
-                element.getterName +
-                "</td>" +
-                "<td>" +
-                element.giveAmt +
+                "<button class='chatButton'>Chat</button>" +
                 "</td>" +
                 "</tr>" +
                 '<tr class="rowGap">' +
