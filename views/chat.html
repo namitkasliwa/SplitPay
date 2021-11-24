@@ -120,6 +120,36 @@
         cursor: pointer;
         width: 100px;
       }
+      .chatBox {
+        border: 1px solid #5c07db;
+        border-radius: 5px;
+        padding: 10px;
+        margin-top: 40px;
+        background: #c5c5c5;
+        display: none;
+      }
+      .chat {
+        margin: 3px 0;
+      }
+      input {
+        width: 92%;
+        height: 30px;
+        font-size: 15px;
+        margin: 0;
+        margin-right: 5px;
+      }
+      .inputmessage {
+        display: flex;
+        align-items: center;
+      }
+      .inputmessage > button {
+        border: none;
+        background-color: #5c07db;
+        color: white;
+        border-radius: 10px;
+        padding: 10px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -134,14 +164,14 @@
           <p>Splits</p>
         </div>
       </a>
-      <a href="/userSettings">
-        <div class="paymentOption">
-          <p>Settings</p>
-        </div>
-      </a>
       <a href="/chat">
         <div class="paymentOption">
           <p>Chat</p>
+        </div>
+      </a>
+      <a href="/userSettings">
+        <div class="paymentOption">
+          <p>Settings</p>
         </div>
       </a>
     </div>
@@ -183,12 +213,24 @@
                 </tr>
               </table>
             </div>
+            <div class="chatBox">
+              <div class="messages"></div>
+              <div class="inputmessage">
+                <input
+                  type="text"
+                  placeholder="Enter a message..."
+                  class="input"
+                />
+                <button onclick="sendmessage();">SEND</button>
+              </div>
+            </div>
           </span>
         </div>
       </div>
     </div>
     <script>
       //fetching user token
+      let roomID = "";
       fetch("/fetchToken", {
         // mode:'no-cors',
         method: "GET",
@@ -220,28 +262,6 @@
       let userToken = sessionStorage.getItem("accessToken");
       // console.log(userToken)
 
-      fetch("/fetchUserDetail", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": "PostmanRuntime/7.28.0",
-          Authorization: "Bearer " + userToken,
-        },
-      })
-        .then((res) => {
-          return res.json();
-        })
-        .then((userDetails) => {
-          document.getElementById("renderName").innerHTML = userDetails.name;
-          document.getElementById("renderBal").innerHTML = userDetails.phoneNo;
-          let qrId =
-            "https://api.qrserver.com/v1/create-qr-code/?data=" +
-            userDetails.phoneNo +
-            "@paytm&amp;";
-          document.getElementById("userQr").src = qrId;
-        })
-        .catch((transError) => console.log("Error" + transError));
-
       //fetching user Transactions
       fetch("/getcontacts", {
         method: "GET",
@@ -262,14 +282,15 @@
           } else {
             var nameDisplay = document.getElementById("displayTable");
             transDetails.forEach((element) => {
-              // console.log(element);
               nameDisplay.innerHTML +=
                 "<tr>" +
                 '<td width="50%">' +
                 element.name +
                 "</td>" +
                 "<td>" +
-                "<button class='chatButton'>Chat</button>" +
+                "<button class='chatButton' onclick=openChat('" +
+                element.chatID +
+                "');>CHAT</button>" +
                 "</td>" +
                 "</tr>" +
                 '<tr class="rowGap">' +
@@ -279,6 +300,55 @@
           }
         })
         .catch((transError) => console.log("Error" + transError));
+      function openChat(uniqueID) {
+        roomID = uniqueID;
+        console.log(uniqueID);
+        fetch(`/getmessages/${uniqueID}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": "PostmanRuntime/7.28.0",
+            Authorization: "Bearer " + userToken,
+          },
+        })
+          .then((result) => {
+            return result.json();
+          })
+          .then((transDetails) => {
+            document.getElementsByClassName("chatBox")[0].style.display =
+              "block";
+            document.getElementsByClassName("messages")[0].innerHTML = "";
+            transDetails[0].messages.map((mess) => {
+              document.getElementsByClassName("messages")[0].innerHTML +=
+                "<div class='chat'>" +
+                mess.senderName +
+                " : " +
+                mess.message +
+                "</div>";
+            });
+          })
+          .catch((transError) => console.log("Error" + transError));
+      }
+      function sendmessage() {
+        let message = document.getElementsByClassName("input")[0].value;
+        fetch(`/addmessage/${roomID}/${message}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": "PostmanRuntime/7.28.0",
+            Authorization: "Bearer " + userToken,
+          },
+        })
+          .then((result) => {
+            return result.json();
+          })
+          .then((transDetails) => {
+            console.log(transDetails);
+            document.getElementsByClassName("input")[0].value = "";
+            openChat(roomID);
+          })
+          .catch((transError) => console.log("Error" + transError));
+      }
     </script>
   </body>
 </html>

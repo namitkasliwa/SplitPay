@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 
 const details = require("./server/models/paymentSchema");
 const splitpayment = require("./server/models/splitSchema");
+const chatMessages = require("./server/models/messageSchema");
 const userCreate = require("./server/routes/user");
 
 const uri =
@@ -199,7 +200,44 @@ app.get("/home", (req, res) => {
 app.get("/getcontacts", authenticateToken, async (req, res) => {
   let userTrans = await conn.collection("userdetails").find().toArray();
   userTrans = userTrans.filter((u) => String(u._id) !== String(user._id));
+  let updatedList = [];
+  userTrans = userTrans.map((u) =>
+    updatedList.push({
+      name: u.name,
+      phoneNo: u.phoneNo,
+      chatID: u._id > user._id ? `${u._id}${user._id}` : `${user._id}${u._id}`,
+    })
+  );
+  res.json(updatedList);
+});
+
+app.get("/getmessages/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  let userTrans = await conn
+    .collection("chatrooms")
+    .find({ chatID: String(id) })
+    .toArray();
+  if (userTrans.length === 0) {
+    let newRoom = new chatMessages({
+      chatID: String(id),
+      messages: [],
+    });
+    await newRoom.save();
+  }
   res.json(userTrans);
+});
+app.get("/addmessage/:id/:message", authenticateToken, async (req, res) => {
+  const { id, message } = req.params;
+  let userTrans = await conn
+    .collection("chatrooms")
+    .find({ chatID: String(id) })
+    .toArray();
+  userTrans[0].messages.push({ senderName: user.name, message: message });
+  const updated = await conn
+    .collection("chatrooms")
+    .updateOne({ _id: userTrans[0]._id }, { $set: userTrans[0] });
+
+  res.json(updated);
 });
 
 // app.post("/pays", (req, res) => {
