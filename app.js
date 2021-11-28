@@ -10,16 +10,15 @@ const details = require("./server/models/paymentSchema");
 const splitpayment = require("./server/models/splitSchema");
 const chatMessages = require("./server/models/messageSchema");
 const userCreate = require("./server/routes/user");
+require("dotenv").config();
 
-const uri =
-  "mongodb+srv://Manav:Manav123@cluster0.k0njo.mongodb.net/SplitPay?retryWrites=true&w=majority";
+const uri = `mongodb+srv://Manav:${process.env.MONGO_PASS}@cluster0.k0njo.mongodb.net/SplitPay?retryWrites=true&w=majority`;
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true, limit: "30mb" }));
 app.use(bodyParser.json({ extended: true }));
 app.use(cors());
 
-require("dotenv").config();
 app.use("/createUser", userCreate);
 
 let accessToken;
@@ -320,7 +319,7 @@ app.post("/makeSplit", authenticateToken, async (req, res) => {
           service: "gmail",
           auth: {
             user: "splitpayiwp@gmail.com",
-            pass: "arunkumarg",
+            pass: process.env.GMAIL_PASSWORD,
           },
         })),
           (mailOption = {
