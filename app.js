@@ -500,7 +500,7 @@ app.post("/payment", authenticateToken, async (req, res) => {
         service: "gmail",
         auth: {
           user: "splitpayiwp@gmail.com",
-          pass: "arunkumarg",
+          pass: process.env.PASS,
         },
       })),
         (mailOption = {
